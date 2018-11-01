@@ -22,4 +22,7 @@ public:
 	
 	UFUNCTION(exec)
 	void Host();
+	
+	UFUNCTION(exec)
+	void Join(const FString& Address);
 };
