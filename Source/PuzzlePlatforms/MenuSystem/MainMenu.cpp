@@ -15,9 +15,22 @@ bool UMainMenu::Initialize()
 
 	return true;
 }
+void UMainMenu::SetMenuInterface(IMenuInterface* MenuInterface)
+{
+	this->MenuInterface = MenuInterface;
+}
 void UMainMenu::HostServer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Hosting Server"));
+	if (MenuInterface != nullptr)
+	{
+		MenuInterface->Host();
+		UE_LOG(LogTemp, Warning, TEXT("Hosting Started"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hosting Failed"));
+	}
 }
 void UMainMenu::JoinServer()
 {
