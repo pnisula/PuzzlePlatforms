@@ -51,7 +51,7 @@ void UMainMenu::HostServer()
 		UE_LOG(LogTemp, Warning, TEXT("Hosting Failed"));
 	}
 }
-void UMainMenu::SetServerList(TArray<FString> ServerNames)
+void UMainMenu::SetServerList(TArray<FServerData> ServerData)
 {
 	UWorld* World = this->GetWorld();
 	if (!ensure(World != nullptr)) return;
@@ -59,12 +59,15 @@ void UMainMenu::SetServerList(TArray<FString> ServerNames)
 	ServerList->ClearChildren();
 
 	uint32 i = 0;
-	for (const FString& ServerName : ServerNames)
+	for (const FServerData& DataRow : ServerData)
 	{
 		UServerRow* Row = CreateWidget<UServerRow>(World, ServerRowClass);
 		if (!ensure(Row != nullptr)) return;
 
-		Row->ServerName->SetText(FText::FromString(ServerName));
+		Row->ServerName->SetText(FText::FromString(DataRow.Name));
+		Row->HostName->SetText(FText::FromString(DataRow.HostUserName));
+		FString ConnectionText = FString::Printf(TEXT("%d/%d"), DataRow.CurrentPlayers, DataRow.MaxPlayers);
+		Row->Connections->SetText(FText::FromString(ConnectionText));
 		Row->Setup(this, i);		
 		++i;
 
