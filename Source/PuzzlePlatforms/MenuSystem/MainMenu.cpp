@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/EditableText.h"
+#include "Components/EditableTextBox.h"
 #include "Components/TextBlock.h"
 
 #include "ServerRow.h"
@@ -23,7 +24,7 @@ bool UMainMenu::Initialize()
 	if (!Success) return false;
 
 	if (!ensure(HostGameButton != nullptr)) return false;	
-	HostGameButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
+	HostGameButton->OnClicked.AddDynamic(this, &UMainMenu::OpenHostMenu);
 
 	if (!ensure(JoinGameButton != nullptr)) return false;
 	JoinGameButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
@@ -31,8 +32,14 @@ bool UMainMenu::Initialize()
 	if (!ensure(BackButton != nullptr)) return false;
 	BackButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
 
+	if (!ensure(Back != nullptr)) return false;
+	Back->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+
 	if (!ensure(JoinButton != nullptr)) return false;
 	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
+
+	if (!ensure(Host != nullptr)) return false;
+	Host->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
 
 	if (!ensure(QuitButton != nullptr)) return false;
 	QuitButton->OnClicked.AddDynamic(this, &UMainMenu::QuitGame);
@@ -43,8 +50,10 @@ bool UMainMenu::Initialize()
 void UMainMenu::HostServer()
 {	
 	if (MenuInterface != nullptr)
-	{
-		MenuInterface->Host();		
+	{		
+		FString CustomServerName = ServerHostName->Text.ToString();
+		
+		MenuInterface->Host(CustomServerName);		
 	}
 	else
 	{
@@ -120,6 +129,13 @@ void UMainMenu::OpenJoinMenu()
 	{
 		MenuInterface->RefreshServerList();
 	}
+}
+void UMainMenu::OpenHostMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(HostMenu != nullptr)) return;
+
+	MenuSwitcher->SetActiveWidget(HostMenu);	
 }
 void UMainMenu::QuitGame()
 {

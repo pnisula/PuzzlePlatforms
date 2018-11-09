@@ -13,6 +13,7 @@
 #include "MenuSystem/MenuWidget.h"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SERVER_NAME_SETTINGS_KEY = TEXT("CustomServerName");
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer & ObjectInitializer)
 {
@@ -49,8 +50,9 @@ void UPuzzlePlatformsGameInstance::Init()
 	}
 }
 
-void UPuzzlePlatformsGameInstance::Host()
+void UPuzzlePlatformsGameInstance::Host(FString CustomServerName)
 {
+	this->CustomServerName = CustomServerName;
 	if (SessionInterface.IsValid())
 	{
 		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
@@ -165,6 +167,16 @@ void UPuzzlePlatformsGameInstance::CreateSession()
 		SessionSettings.NumPublicConnections = 2;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
+
+		FString SessionCustomName = "Default";
+		if (!CustomServerName.IsEmpty())
+		{
+			SessionCustomName = CustomServerName;
+		}
+		
+		
+		SessionSettings.Set(SERVER_NAME_SETTINGS_KEY, SessionCustomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSettings);
 	}	
 }
@@ -190,13 +202,21 @@ void UPuzzlePlatformsGameInstance::OnFindSessionsComplete(bool Success)
 		for (const FOnlineSessionSearchResult& Result : SessionSearch->SearchResults)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Found Session: %s"), *Result.Session.GetSessionIdStr());
-			FServerData Data;
-			Data.Name = Result.Session.GetSessionIdStr();
-			Data.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
-			
+			FServerData Data;			
+			Data.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;			
 			Data.CurrentPlayers = Data.MaxPlayers - Result.Session.NumOpenPublicConnections;			
 			Data.HostUserName = Result.Session.OwningUserName;
-			
+			FString CustomServerName;
+			if (Result.Session.SessionSettings.Get(SERVER_NAME_SETTINGS_KEY, CustomServerName))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Found Custom Server Name: %s"), *CustomServerName);
+				Data.Name = CustomServerName;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Custom Server Name Not Found"));
+				Data.Name = "Could not find name";
+			}
 			ServerData.Add(Data);
 		}
 		Menu->SetServerList(ServerData);
