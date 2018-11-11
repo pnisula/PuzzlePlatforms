@@ -12,7 +12,7 @@
 #include "MenuSystem/MainMenu.h"
 #include "MenuSystem/MenuWidget.h"
 
-const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SESSION_NAME = TEXT("GameSession");
 const static FName SERVER_NAME_SETTINGS_KEY = TEXT("CustomServerName");
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer & ObjectInitializer)
@@ -106,6 +106,14 @@ void UPuzzlePlatformsGameInstance::LeaveServer()
 
 	PlayerController->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
 }
+void UPuzzlePlatformsGameInstance::StartSession()
+{
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->StartSession(SESSION_NAME);
+	}
+}
+
 void UPuzzlePlatformsGameInstance::LoadMenuWidget()
 {
 	if (!ensure(MenuClass != nullptr)) return;
@@ -141,7 +149,7 @@ void UPuzzlePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, bo
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
-	World->ServerTravel("/Game/ThirdPersonCPP/Maps/ThirdPersonExampleMap?listen");
+	World->ServerTravel("/Game/PuzzlePlatforms/Maps/Lobby?listen");
 }
 void UPuzzlePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, bool Success)
 {
@@ -164,7 +172,7 @@ void UPuzzlePlatformsGameInstance::CreateSession()
 		{
 			SessionSettings.bIsLANMatch = false;
 		}		
-		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.NumPublicConnections = 5;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
 
@@ -173,7 +181,6 @@ void UPuzzlePlatformsGameInstance::CreateSession()
 		{
 			SessionCustomName = CustomServerName;
 		}
-		
 		
 		SessionSettings.Set(SERVER_NAME_SETTINGS_KEY, SessionCustomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 

@@ -30,6 +30,9 @@ public:
 	UFUNCTION(exec)
 	virtual void Join(uint32 Index) override;
 
+	UFUNCTION()
+	void StartSession();
+
 	UFUNCTION(exec)
 	virtual void LeaveServer() override;
 
